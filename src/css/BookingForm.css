@@ -1,6 +1,18 @@
-.booking-form {
-  margin-top: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
+
+.booking-form-container {
+  animation: fadeIn 0.5s ease-out;
+}
+
+
+@media (max-width: 600px) {
+  .MuiGrid-item {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+}
+
