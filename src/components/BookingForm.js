@@ -1,10 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TextField, Button, MenuItem } from '@mui/material';
 import API from '../api';
 import '../css/BookingForm.css';
 
-export default function BookingForm({ fetchBookings }) {
-  const [form, setForm] = useState({ customer_name: '', address: '', date_time: '', service_id: '' });
+export default function BookingForm({ fetchBookings, selectedBooking, clearSelection }) {
+  const [form, setForm] = useState({
+    customer_name: '',
+    address: '',
+    date_time: '',
+    service_id: ''
+  });
   const [services, setServices] = useState([]);
 
   useEffect(() => {
@@ -15,11 +20,31 @@ export default function BookingForm({ fetchBookings }) {
     loadServices();
   }, []);
 
+  useEffect(() => {
+    if (selectedBooking) {
+      setForm({
+        customer_name: selectedBooking.customer_name,
+        address: selectedBooking.address,
+        date_time: selectedBooking.date_time.slice(0, 16), // Format for datetime-local
+        service_id: selectedBooking.service_id._id
+      });
+    }
+  }, [selectedBooking]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await API.post('/bookings', form);
-    setForm({ customer_name: '', address: '', date_time: '', service_id: '' });
+
+    if (selectedBooking) {
+      // Edit mode
+      await API.put(`/bookings/${selectedBooking._id}`, form);
+    } else {
+      // Create mode
+      await API.post('/bookings', form);
+    }
+
     fetchBookings();
+    clearSelection();
+    setForm({ customer_name: '', address: '', date_time: '', service_id: '' });
   };
 
   return (
@@ -30,7 +55,7 @@ export default function BookingForm({ fetchBookings }) {
       <TextField select label="Service Type" fullWidth margin="dense" value={form.service_id} onChange={(e) => setForm({ ...form, service_id: e.target.value })}>
         {services.map(s => <MenuItem key={s._id} value={s._id}>{s.name}</MenuItem>)}
       </TextField>
-      <Button variant="contained" type="submit">Book</Button>
+      <Button variant="contained" type="submit">{selectedBooking ? 'Update Booking' : 'Add Booking'}</Button>
     </form>
   );
 }
