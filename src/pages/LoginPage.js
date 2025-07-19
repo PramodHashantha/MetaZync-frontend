@@ -8,15 +8,20 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
-  const handleLogin = async () => {
-    try {
-      const res = await API.post('/auth/login', { username, password });
-      localStorage.setItem('token', res.data.token);
-      navigate('/dashboard');
-    } catch (err) {
-      alert('Invalid login');
-    }
-  };
+const handleLogin = async () => {
+  try {
+    const res = await API.post('/auth/login', { username, password });
+    localStorage.setItem('token', res.data.token);
+
+    // Fetch user role
+    const userRes = await API.get('/auth/me');
+    localStorage.setItem('userRole', userRes.data.role);  // <-- store role
+
+    navigate('/dashboard');
+  } catch (err) {
+    alert('Invalid login');
+  }
+};
 
     const goToRegister = () => {
     navigate('/register');
